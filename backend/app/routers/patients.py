@@ -17,6 +17,7 @@ from ..utils.deps import get_current_active_user, require_clinic_access
 
 router = APIRouter(prefix="/patients", tags=["patients"])
 
+#Create a new patient
 @router.post("/", response_model=PatientDetailResponse)
 async def create_patient(
     patient_data: PatientCreate,
@@ -59,6 +60,7 @@ async def create_patient(
     # Return detailed response
     return _get_patient_detail(patient.id, db, current_user)
 
+#List patients with filters and search
 @router.get("/", response_model=PatientListResponse)
 async def get_patients(
     page: int = Query(1, ge=1),
@@ -137,6 +139,7 @@ async def get_patients(
         per_page=per_page
     )
 
+#Clinic-level patient statistics
 @router.get("/stats", response_model=PatientStatsResponse)
 async def get_patient_stats(
     db: Session = Depends(get_db),
@@ -214,6 +217,7 @@ async def get_patient_stats(
         recent_patients=recent_patient_details
     )
 
+#Get patient details
 @router.get("/{patient_id}", response_model=PatientDetailResponse)
 async def get_patient(
     patient_id: int,
@@ -223,6 +227,7 @@ async def get_patient(
     """Get patient details with comprehensive information."""
     return _get_patient_detail(patient_id, db, current_user)
 
+#Update patient info
 @router.put("/{patient_id}", response_model=PatientDetailResponse)
 async def update_patient(
     patient_id: int,
@@ -255,6 +260,7 @@ async def update_patient(
     
     return _get_patient_detail(patient.id, db, current_user)
 
+#Delete a patient
 @router.delete("/{patient_id}")
 async def delete_patient(
     patient_id: int,

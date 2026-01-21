@@ -16,6 +16,7 @@ from ..utils.audit import get_audit_logger, AuditAction, AuditEntityType
 
 router = APIRouter(prefix="/patient-dashboard", tags=["patient-dashboard"])
 
+#summarizes patient’s document metrics.
 class PatientDashboardStats(BaseModel):
     total_documents: int
     recent_documents: int
@@ -31,6 +32,7 @@ class PatientDashboardResponse(BaseModel):
     recent_documents: List[DocumentResponse]
     timeline_events: List[dict]
 
+#Patient dashboard
 @router.get("/", response_model=PatientDashboardResponse)
 async def get_patient_dashboard(
     request: Request,
@@ -118,6 +120,7 @@ async def get_patient_dashboard(
         timeline_events=timeline_events
     )
 
+#Filtered document list
 @router.get("/documents", response_model=List[DocumentResponse])
 async def get_patient_documents(
     page: int = Query(1, ge=1),
@@ -161,6 +164,8 @@ async def get_patient_documents(
     
     return [DocumentResponse.from_orm(doc) for doc in documents]
 
+
+#Patient Timeline
 @router.get("/timeline")
 async def get_patient_timeline(
     days: int = Query(30, ge=7, le=365),
@@ -191,6 +196,7 @@ async def get_patient_timeline(
     
     return {"timeline_events": timeline_events}
 
+#Patient statistics
 @router.get("/stats")
 async def get_patient_stats(
     request: Request = None,

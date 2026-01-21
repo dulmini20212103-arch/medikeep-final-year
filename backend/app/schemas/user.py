@@ -1,9 +1,11 @@
 from pydantic import BaseModel, EmailStr, validator
 from typing import Optional
 from datetime import datetime
-from ..models.user import UserRole
+from ..models.user import UserRole #role-based access control
 from ..utils.validators import SecurityValidatorMixin, SecureTextValidator
 
+#core user identity schema
+#foundation schema reused across create, response, and token payloads
 class UserBase(BaseModel, SecurityValidatorMixin):
     email: EmailStr
     first_name: str
@@ -23,6 +25,8 @@ class UserBase(BaseModel, SecurityValidatorMixin):
     def validate_email_security(cls, v):
         return SecureTextValidator.validate_email_field(str(v))
 
+#registration input schema
+#Extends UserBase and adds password.
 class UserCreate(UserBase):
     password: str
     
@@ -38,6 +42,7 @@ class UserCreate(UserBase):
             raise ValueError('Password must contain at least one digit')
         return v
 
+#partial updates
 class UserUpdate(BaseModel, SecurityValidatorMixin):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -52,7 +57,9 @@ class UserUpdate(BaseModel, SecurityValidatorMixin):
     def validate_last_name(cls, v):
         return SecureTextValidator.sanitize_name(v) if v else None
 
+#API output schema
 class UserResponse(UserBase):
+    #Adds system-controlled fields
     id: int
     is_active: bool
     is_verified: bool
@@ -61,12 +68,16 @@ class UserResponse(UserBase):
     class Config:
         from_attributes = True
 
+#authentication input
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+#authentication response payload
 class Token(BaseModel):
     access_token: str
     token_type: str
     expires_in: int
     user: UserResponse
+
+    #strictly controls user input and output, enforces strong password and identity validation, prevents security vulnerabilities, and cleanly separates authentication, profile management, and authorization concerns.

@@ -28,6 +28,7 @@ async def register(
         )
     
     # Create user
+    #Passwords are stored securely (hashed)
     hashed_password = get_password_hash(user_data.password)
     db_user = User(
         email=user_data.email,
@@ -56,6 +57,7 @@ async def register(
         db.add(db_clinic)
         db.commit()
     
+    #Returns user data without exposing sensitive fields
     return UserResponse.from_orm(db_user)
 
 @router.post("/login", response_model=Token)
@@ -66,6 +68,7 @@ async def login(
     """Authenticate user and return access token."""
     user = db.query(User).filter(User.email == form_data.username).first()
     
+    #Validates email and password
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -73,6 +76,7 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    #Checks if user is active
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

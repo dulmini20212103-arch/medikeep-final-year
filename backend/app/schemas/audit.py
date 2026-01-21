@@ -6,11 +6,12 @@ from ..models.audit_log import AuditAction, AuditEntityType
 class AuditLogBase(BaseModel):
     action: AuditAction
     entity_type: AuditEntityType
-    entity_id: Optional[str] = None
+    entity_id: Optional[str] = None #optional identifiers of the affected entity.
     entity_name: Optional[str] = None
     description: str
     success: bool = True
 
+#represents a full audit log record returned from the API.
 class AuditLogResponse(AuditLogBase):
     id: int
     user_id: Optional[int]
@@ -35,6 +36,7 @@ class AuditLogListResponse(BaseModel):
     page: int
     per_page: int
 
+#Defines the input for filtering audit logs in API queries
 class AuditLogFilter(BaseModel):
     action: Optional[AuditAction] = None
     entity_type: Optional[AuditEntityType] = None
@@ -45,6 +47,7 @@ class AuditLogFilter(BaseModel):
     date_to: Optional[datetime] = None
     success: Optional[bool] = None
 
+#Represents summary statistics for audit logs, typically for dashboards
 class AuditLogStats(BaseModel):
     total_logs: int
     logs_today: int
@@ -53,3 +56,8 @@ class AuditLogStats(BaseModel):
     top_actions: Dict[str, int]
     top_entities: Dict[str, int]
     recent_activities: List[AuditLogResponse]
+
+
+    #These schemas structure both input (filters) and output (responses/statistics) for the audit logging system.
+    # They help validate requests, return structured API responses, and integrate with your database models.
+    # Combined with your audit logger, they support tracking user actions, changes, errors, and security compliance.

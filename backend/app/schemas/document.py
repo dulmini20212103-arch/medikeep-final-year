@@ -4,6 +4,7 @@ from datetime import datetime
 from ..models.document import DocumentType, DocumentStatus
 from ..utils.validators import SecurityValidatorMixin, SecureTextValidator
 
+#shared foundation
 class DocumentBase(BaseModel, SecurityValidatorMixin):
     original_filename: str
     document_type: Optional[DocumentType] = None
@@ -17,6 +18,9 @@ class DocumentBase(BaseModel, SecurityValidatorMixin):
     def validate_notes(cls, v):
         return SecureTextValidator.sanitize_notes(v) if v else None
 
+
+#upload contract
+#protects your system before a file is accepted.
 class DocumentCreate(DocumentBase):
     patient_id: Optional[int] = None
     clinic_id: int
@@ -45,6 +49,7 @@ class DocumentCreate(DocumentBase):
             raise ValueError('File size exceeds maximum allowed size of 50MB')
         return v
 
+#Allows safe edits
 class DocumentUpdate(BaseModel, SecurityValidatorMixin):
     document_type: Optional[DocumentType] = None
     notes: Optional[str] = None
@@ -54,6 +59,7 @@ class DocumentUpdate(BaseModel, SecurityValidatorMixin):
     def validate_notes(cls, v):
         return SecureTextValidator.sanitize_notes(v) if v else None
 
+#standard API output
 class DocumentResponse(DocumentBase):
     id: int
     patient_id: Optional[int]
@@ -78,6 +84,7 @@ class DocumentResponse(DocumentBase):
     class Config:
         from_attributes = True
 
+#deep inspection view
 class DocumentDetailResponse(DocumentResponse):
     # Patient information
     patient_first_name: Optional[str] = None
@@ -511,3 +518,7 @@ class DocumentTemplateResponse(BaseModel):
     field_definitions: Dict[str, Any]
     validation_rules: Dict[str, Any]
     extraction_hints: Dict[str, Any]
+
+
+
+    #The AI operates downstream; this schema layer strictly validates, structures, and governs the data the AI consumes and produces.

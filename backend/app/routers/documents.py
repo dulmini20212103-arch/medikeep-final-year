@@ -19,6 +19,7 @@ from ..utils.file_handler import save_upload_file, delete_file, get_file_info
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
+#Upload a document
 @router.post("/upload", response_model=DocumentUploadResponse)
 async def upload_document(
     file: UploadFile = File(...),
@@ -86,6 +87,7 @@ async def upload_document(
         document=DocumentResponse.from_orm(document)
     )
 
+#List documents with filters
 @router.get("/", response_model=DocumentListResponse)
 async def get_documents(
     page: int = Query(1, ge=1),
@@ -139,6 +141,7 @@ async def get_documents(
         per_page=per_page
     )
 
+#Retrieve a single document
 @router.get("/{document_id}", response_model=DocumentResponse)
 async def get_document(
     document_id: int,
@@ -164,6 +167,7 @@ async def get_document(
     
     return DocumentResponse.from_orm(document)
 
+#Download document file
 @router.get("/{document_id}/download")
 async def download_document(
     document_id: int,
@@ -197,6 +201,7 @@ async def download_document(
         media_type=document.mime_type
     )
 
+#Assign document to a patient
 @router.put("/{document_id}/assign", response_model=DocumentResponse)
 async def assign_document_to_patient(
     document_id: int,
@@ -231,6 +236,7 @@ async def assign_document_to_patient(
     
     return DocumentResponse.from_orm(document)
 
+#Update document metadata
 @router.put("/{document_id}", response_model=DocumentResponse)
 async def update_document(
     document_id: int,
@@ -249,7 +255,7 @@ async def update_document(
     if clinic and document.clinic_id != clinic.id:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    # Update fields
+    # Only updates fields that are provided
     update_data = document_update.dict(exclude_unset=True)
     for field, value in update_data.items():
         setattr(document, field, value)
@@ -259,6 +265,7 @@ async def update_document(
     
     return DocumentResponse.from_orm(document)
 
+#Delete a document
 @router.delete("/{document_id}")
 async def delete_document(
     document_id: int,

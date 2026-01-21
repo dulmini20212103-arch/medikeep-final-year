@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, and_, desc
+#Used for time-based filtering and statistics
 from typing import List, Optional
 from datetime import datetime, timedelta
 
@@ -8,16 +9,20 @@ from ..database import get_db
 from ..models.audit_log import AuditLog, AuditAction, AuditEntityType
 from ..models.user import User, UserRole
 from ..models.clinic import Clinic
+#Controls what data is exposed
 from ..schemas.audit import (
     AuditLogResponse, AuditLogListResponse, AuditLogFilter, AuditLogStats
 )
+#Centralized audit log creation
 from ..utils.deps import get_current_active_user, require_admin
 from ..utils.audit import get_audit_logger
 
 router = APIRouter(prefix="/audit", tags=["audit"])
 
+#Returns audit logs and Applies role-based access control
 @router.get("/logs", response_model=AuditLogListResponse)
 async def get_audit_logs(
+    #Prevents database overload
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     action: Optional[AuditAction] = None,
@@ -57,6 +62,7 @@ async def get_audit_logs(
             )
         )
     else:
+        #This enforces least-privilege access
         raise HTTPException(status_code=403, detail="Access denied")
     
     # Apply filters
@@ -139,6 +145,7 @@ async def get_audit_stats(
         recent_activities=[AuditLogResponse.from_orm(log) for log in recent_logs]
     )
 
+#current user’s actions
 @router.get("/my-activity", response_model=AuditLogListResponse)
 async def get_my_activity(
     page: int = Query(1, ge=1),
@@ -171,7 +178,7 @@ async def create_test_audit_log(
     current_user: User = Depends(get_current_active_user)
 ):
     """Create a test audit log entry (for testing purposes)."""
-    
+    #Uses centralized logging utility
     audit_logger = get_audit_logger(db)
     
     audit_log = audit_logger.log_user_action(

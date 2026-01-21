@@ -16,9 +16,12 @@ from ..utils.deps import get_current_active_user, require_clinic_access
 
 router = APIRouter(prefix="/clinic", tags=["clinic"])
 
+#Get clinic profile
 @router.get("/profile", response_model=ClinicResponse)
+#Fetches the clinic associated with the logged-in user.
 async def get_clinic_profile(
     db: Session = Depends(get_db),
+    #Uses dependency to ensure only clinic staff/admin can access.
     current_user: User = Depends(require_clinic_access)
 ):
     """Get current clinic profile."""
@@ -29,6 +32,7 @@ async def get_clinic_profile(
     
     return ClinicResponse.from_orm(clinic)
 
+#Update clinic profile
 @router.put("/profile", response_model=ClinicResponse)
 async def update_clinic_profile(
     clinic_update: ClinicUpdate,
@@ -46,11 +50,13 @@ async def update_clinic_profile(
     for field, value in update_data.items():
         setattr(clinic, field, value)
     
+    #Saves changes in the database
     db.commit()
     db.refresh(clinic)
     
     return ClinicResponse.from_orm(clinic)
 
+#Clinic dashboard statistics
 @router.get("/dashboard", response_model=ClinicDashboardStats)
 async def get_clinic_dashboard_stats(
     db: Session = Depends(get_db),
@@ -127,6 +133,7 @@ async def get_clinic_dashboard_stats(
         system_alerts=system_alerts
     )
 
+#Complete clinic overview
 @router.get("/overview", response_model=ClinicOverview)
 async def get_clinic_overview(
     db: Session = Depends(get_db),
