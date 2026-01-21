@@ -1,6 +1,9 @@
+#Define table columns and types.
 from sqlalchemy import Column, Integer, String, Date, Text, DateTime, ForeignKey, Enum
+#Provides database functions for timestamps
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+#to define controlled value sets.
 import enum
 from ..database import Base
 

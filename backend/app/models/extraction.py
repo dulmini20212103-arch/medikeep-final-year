@@ -1,6 +1,9 @@
+#Define table columns and types.
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, JSON, Float, Enum
+#Provides database functions for timestamps
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+#to define controlled value sets.
 import enum
 from ..database import Base
 
@@ -42,7 +45,7 @@ class Extraction(Base):
     # Metadata
     extraction_method = Column(String)  # "OCR+AI", "AI_ONLY", etc
     processing_time_seconds = Column(Float)
-    error_message = Column(Text)
+    error_message = Column(Text) # details if extraction failed
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     completed_at = Column(DateTime(timezone=True))

@@ -1,9 +1,13 @@
+#Define table columns and types.
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Enum, BigInteger
+#Provides database functions for timestamps
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+#to define controlled value sets.
 import enum
 from ..database import Base
 
+#Using an Enum ensures only valid document types are stored.
 class DocumentType(enum.Enum):
     LAB_REPORT = "lab_report"
     PRESCRIPTION = "prescription"
@@ -34,6 +38,7 @@ class Document(Base):
     upload_date = Column(DateTime(timezone=True), server_default=func.now())
     processed_date = Column(DateTime(timezone=True))
     notes = Column(Text)
+    #Tracks record creation and modification timestamps automatically.
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
