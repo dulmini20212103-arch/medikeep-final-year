@@ -1,13 +1,9 @@
-#Define table columns and types.
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Enum, BigInteger
-#Provides database functions for timestamps
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Enum, BigInteger, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-#to define controlled value sets.
 import enum
 from ..database import Base
 
-#Using an Enum ensures only valid document types are stored.
 class DocumentType(enum.Enum):
     LAB_REPORT = "lab_report"
     PRESCRIPTION = "prescription"
@@ -38,11 +34,14 @@ class Document(Base):
     upload_date = Column(DateTime(timezone=True), server_default=func.now())
     processed_date = Column(DateTime(timezone=True))
     notes = Column(Text)
-    #Tracks record creation and modification timestamps automatically.
+    is_patient_upload = Column(Boolean, default=False, server_default="false", nullable=False)
+    uploaded_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
     patient = relationship("Patient", back_populates="documents")
     clinic = relationship("Clinic", back_populates="documents")
+    uploaded_by_user = relationship("User", foreign_keys=[uploaded_by_user_id])
     extractions = relationship("Extraction", back_populates="document")
+    chunks = relationship("DocumentChunk", back_populates="document", cascade="all, delete-orphan", passive_deletes=True)
